@@ -36,6 +36,7 @@
 #include "vircommand.h"
 #include "virerror.h"
 #include "virfile.h"
+#include "virhostmem.h"
 #include "virlog.h"
 #include "virnetdevtap.h"
 #include "virobject.h"
@@ -2039,6 +2040,19 @@ chDomainInterfaceAddresses(virDomainPtr dom,
     return ret;
 }
 
+static int
+chNodeGetMemoryStats(virConnectPtr conn,
+                     int cellNum,
+                     virNodeMemoryStatsPtr params,
+                     int *nparams,
+                     unsigned int flags)
+{
+    if (virNodeGetMemoryStatsEnsureACL(conn) < 0)
+        return -1;
+
+    return virHostMemGetStats(cellNum, params, nparams, flags);
+}
+
 
 /* Function Tables */
 static virHypervisorDriver chHypervisorDriver = {
@@ -2093,6 +2107,7 @@ static virHypervisorDriver chHypervisorDriver = {
     .domainSetAutostart = chDomainSetAutostart,             /* 6.7.0 */
     .domainSetVcpus = chDomainSetVcpus,                     /* 6.7.0 */
     .domainInterfaceAddresses = chDomainInterfaceAddresses, /* 6.7.0 */
+    .nodeGetMemoryStats = chNodeGetMemoryStats,             /* 6.7.0 */
 };
 
 static virConnectDriver chConnectDriver = {
