@@ -1998,6 +1998,47 @@ static int chDomainGetAutostart(virDomainPtr dom,
     return ret;
 };
 
+static int
+chDomainInterfaceAddresses(virDomainPtr dom,
+                           virDomainInterfacePtr **ifaces,
+                           unsigned int source,
+                           unsigned int flags)
+{
+    virDomainObjPtr vm = NULL;
+    int ret = -1;
+
+    virCheckFlags(0, -1);
+
+    if (!(vm = chDomObjFromDomain(dom)))
+        goto cleanup;
+
+    if (virDomainInterfaceAddressesEnsureACL(dom->conn, vm->def) < 0)
+        goto cleanup;
+
+    if (virDomainObjCheckActive(vm) < 0)
+        goto cleanup;
+
+    switch (source) {
+    case VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_LEASE:
+        ret = virDomainNetDHCPInterfaces(vm->def, ifaces);
+        break;
+
+    case VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_ARP:
+        ret = virDomainNetARPInterfaces(vm->def, ifaces);
+        break;
+
+    default:
+        virReportError(VIR_ERR_ARGUMENT_UNSUPPORTED,
+                       _("Unknown IP address data source %d"),
+                       source);
+        break;
+    }
+
+ cleanup:
+    virDomainObjEndAPI(&vm);
+    return ret;
+}
+
 
 /* Function Tables */
 static virHypervisorDriver chHypervisorDriver = {
@@ -2051,6 +2092,7 @@ static virHypervisorDriver chHypervisorDriver = {
     .domainGetAutostart = chDomainGetAutostart,             /* 6.7.0 */
     .domainSetAutostart = chDomainSetAutostart,             /* 6.7.0 */
     .domainSetVcpus = chDomainSetVcpus,                     /* 6.7.0 */
+    .domainInterfaceAddresses = chDomainInterfaceAddresses, /* 6.7.0 */
 };
 
 static virConnectDriver chConnectDriver = {
