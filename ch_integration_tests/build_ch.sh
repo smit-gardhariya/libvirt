@@ -2,7 +2,7 @@
 set -x -e
 source $HOME/.cargo/env
 
-CH_VERSION="master"
+CH_VERSION="main"
 git init cloud-hypervisor
 pushd cloud-hypervisor
 git remote add origin https://github.com/cloud-hypervisor/cloud-hypervisor
