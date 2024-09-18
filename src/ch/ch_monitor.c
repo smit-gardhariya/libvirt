@@ -119,7 +119,7 @@ virCHMonitorBuildPlatformJson(virJSONValuePtr content, virDomainDefPtr vmdef)
     ) {
         platform = virJSONValueNewObject();
 
-        if (virJSONValueObjectAppendBoolean(platform, "snp", 1) < 0)
+        if (virJSONValueObjectAppendBoolean(platform, "sev_snp", 1) < 0)
             goto cleanup;
 
         if (virJSONValueObjectAppend(content, "platform", platform) < 0)
@@ -216,7 +216,7 @@ virCHMonitorBuildPayloadJson(virJSONValuePtr content, virDomainDefPtr vmdef)
             virReportError(
                 VIR_ERR_INTERNAL_ERROR,
                 "%s",
-                _("IGVM image path in this domain is not defined. Please pass IGVM filepath while passing 'snp=on'")
+                _("IGVM image path in this domain is not defined. Please pass IGVM filepath while passing 'sev_snp=on'")
             );
             goto cleanup;
         } else {
